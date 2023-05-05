@@ -1,3 +1,95 @@
 from django.db import models
 
-# Create your models here.
+
+class Student(models.Model):
+    GENDER_CHOICES = (
+        ('M', 'Male'),
+        ('F', 'Female'),
+        ('O', 'Other'),
+    )
+
+    id = models.AutoField(primary_key=True)
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+    email = models.EmailField(unique=True)
+    # use Django's built-in hashing
+    password = models.CharField(max_length=128)
+    date_of_birth = models.DateField()
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
+    phone_number = models.CharField(max_length=20)
+    address = models.CharField(max_length=255)
+    city = models.CharField(max_length=100)
+    country = models.CharField(max_length=100)
+    university_name = models.CharField(max_length=255)
+    degree_name = models.CharField(max_length=255)
+    graduation_year = models.IntegerField()
+    major = models.CharField(max_length=255)
+    gpa = models.DecimalField(max_digits=4, decimal_places=2)
+    skills = models.TextField()
+    profile_picture_url = models.URLField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class Employer(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=255)
+    email = models.EmailField(unique=True)
+    # use Django's built-in hashing
+    password = models.CharField(max_length=128)
+    phone_number = models.CharField(max_length=20)
+    address = models.CharField(max_length=255)
+    city = models.CharField(max_length=100)
+    country = models.CharField(max_length=100)
+    website_url = models.URLField(null=True, blank=True)
+    logo_url = models.URLField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class JobPosting(models.Model):
+    JOB_TYPE_CHOICES = (
+        ('FT', 'Full-time'),
+        ('PT', 'Part-time'),
+        ('IN', 'Internship'),
+        ('CO', 'Contract'),
+    )
+
+    id = models.AutoField(primary_key=True)
+    employer = models.ForeignKey(Employer, on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    location = models.CharField(max_length=255)
+    job_type = models.CharField(max_length=2, choices=JOB_TYPE_CHOICES)
+    required_skills = models.TextField()
+    application_deadline = models.DateField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class Collaboration(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=255)
+    members = models.ManyToManyField(Student, related_name='collaborations')
+    description = models.TextField()
+    created_by = models.ForeignKey(
+        Student, on_delete=models.CASCADE, related_name='created_collaborations')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class Notification(models.Model):
+    NOTIFICATION_TYPE_CHOICES = (
+        ('AP', 'Application'),
+        ('IN', 'Invitation'),
+        ('CO', 'Collaboration'),
+        ('OT', 'Other'),
+    )
+
+    id = models.AutoField(primary_key=True)
+    recipient = models.ForeignKey(
+        Student, on_delete=models.CASCADE, related_name='notifications')
+    message = models.TextField()
+    type = models.CharField(max_length=2, choices=NOTIFICATION_TYPE_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
